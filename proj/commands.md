@@ -6,6 +6,7 @@ Aliases: `mjs!commands` `mjs!info`
 
 ## `mjs!calc` - Calculate
 Aliases: `mjs!calculate`
+
 ---------------------
 `mjs!calc roll <num>` - Roll an number
 
