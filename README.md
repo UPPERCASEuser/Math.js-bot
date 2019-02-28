@@ -1,7 +1,7 @@
 # Math.js-bot
 An fan-made discord bot using the math.js engine
 
-# Prefix : `mjs!` or `!mjs (without space)`
+# Prefix : `mjs!`, `!mjs (without space)`, `mjs1`, `1mjs (without space)`
 
 # More information
 Lang = js
