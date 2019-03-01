@@ -3,6 +3,9 @@ An fan-made discord bot using the math.js engine
 
 # Prefix : `mjs!`, `!mjs (without space)`, `mjs1`, `1mjs (without space)`
 
+# Donation
+Just inviting it ok, we don't prefer donations
+
 # More information
 Lang = js
 
