@@ -11,7 +11,17 @@ var bot = new Eris.CommandClient(fs.readFileSync('token.txt', 'utf8'), {}, {
 
 bot.on("ready", () => { // When the bot is ready
     console.log("Servers: " + bot.guilds.size + "." + " Logged in: " + bot.user.id);
-    bot.editStatus("online", { name: "mjs!help", type: 3});
+    bot.editStatus("online", { name: "mjs!help | " + bot.guilds.size +  " servers", type: 3});
+});
+
+bot.on("guildCreate", (guild) => {
+	console.log("Server joined! Server counter: " + bot.guilds.size);
+	bot.editStatus("online", { name: "mjs!help | " + bot.guilds.size +  " servers", type: 3});
+});
+
+bot.on("guildDelete", (guild) => {
+	console.log("Server Removed ;-;. Server counter: " + bot.guilds.size);
+	bot.editStatus("online", { name: "mjs!help | " + bot.guilds.size +  " servers", type: 3});
 });
 
 bot.registerCommand("help", (msg) => {
@@ -55,7 +65,10 @@ bot.registerCommand("help", (msg) => {
 	cooldownMessage: "```markdown\n# Calm down, or I'll end up having problems. #```"
 });
 bot.registerCommandAlias("commands", "help");
+bot.registerCommandAlias("command", "help");
 bot.registerCommandAlias("info", "help");
+bot.registerCommandAlias("information", "help");
+bot.registerCommandAlias("bothelp", "help");
 bot.registerCommandAlias("HELP", "help");
 bot.registerCommandAlias("Help", "help");
 
@@ -98,24 +111,64 @@ var calcCommand = bot.registerCommand("calc", (msg, args) => { // Make an echo c
 							},
 							{
 								name: "Result", // Field title
-								value: "```" + result + "```", // Field
+								value: "```js\n" + result + "```", // Field
 								inline: true // Whether you want multiple fields in same line
 							}
 						],
-						            footer: { // Footer text
-                text: "Try to use the aliases of this command!",
-				icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
-            }
+						footer: { // Footer text
+							text: "Try to use the aliases of this command!",
+							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+						}
 					}
 				});
 			} catch (e) {
-				bot.createMessage(msg.channel.id, e.toString());
+				bot.createMessage(msg.channel.id, {
+					embed: {
+						color: 0xff0000, // Color, either in hex (show), or a base-10 integer
+						author: { // Author property
+							name: "Error",
+							icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
+						},
+						description: "```" + e.toString() + "```",
+						footer: { // Footer text
+							text: "I've created a filter for you don't find errors HAHAHA",
+							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+						}
+					}
+				});
 			}
         } else {
+			bot.createMessage(msg.channel.id, {
+				embed: {
+					color: 0xff0000, // Color, either in hex (show), or a base-10 integer
+					author: { // Author property
+						name: "Error",
+						icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
+					},
+					description: "A text or bug has been detected, try to use math accounts",
+					footer: { // Footer text
+						text: "I've created a filter for you don't find errors HAHAHA",
+						icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+					}
+				}
+			});
 			bot.createMessage(msg.channel.id, "A text or bug has been detected, try to use math accounts");
 		}
 	} catch (e) {
-		bot.createMessage(msg.channel.id, e.toString());
+		bot.createMessage(msg.channel.id, {
+			embed: {
+				color: 0xff0000, // Color, either in hex (show), or a base-10 integer
+				author: { // Author property
+					name: "Error",
+					icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
+				},
+				description: "```" + e.toString() + "```",
+				footer: { // Footer text
+					text: "I've created a filter for you don't find errors HAHAHA",
+					icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+				}
+			}
+		});
 	}
 }, {
     description: "Calculate",
@@ -143,10 +196,10 @@ calcCommand.registerSubcommand("roll", (msg, args) => { // Make a reverse subcom
 							name: "ðŸŽ² You rolled",
 						},
 						description: "```" + number + "```",
-						            footer: { // Footer text
-                text: "I like dices!",
-				icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
-            }
+						footer: { // Footer text
+							text: "I like dices!",
+							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+						}
 					}
 				});
 }, {
@@ -161,7 +214,7 @@ calcCommand.registerSubcommandAlias("ROLL", "roll"); // Alias "!echo backwards" 
 bot.registerCommand("invite", (msg) => {
 	bot.createMessage(msg.channel.id, {
 		embed: {
-		description: "**[Invite](https://discordapp.com/oauth2/authorize?client_id=538357066805411841&permissions=391232&redirect_uri=http%3A%2F%2Fmathjs.org%2Findex.html&scope=bot)**\n\n[Official server](https://discord.gg/67NkaBY)\n[Github](https://github.com/UPPERCASEuser/Math.js-bot)",
+		description: "**[Invite](https://discordapp.com/oauth2/authorize?client_id=538357066805411841&permissions=391232&redirect_uri=http%3A%2F%2Fmathjs.org%2Findex.html&scope=bot)**\n\n[Official server](https://discord.gg/67NkaBY)\n[Github](https://github.com/UPPERCASEuser/Math.js-bot)\n[List to-do](https://trello.com/invite/b/ZndibEkk/e0cfe1d171c054a98f5a609e505833b4/mathjs-bot)",
 			author: { // Author property
 				name: "Invite",
 				icon_url: bot.user.avatarURL
