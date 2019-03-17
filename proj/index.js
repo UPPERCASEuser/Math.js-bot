@@ -2,10 +2,13 @@ const Eris = require("eris");
 const math = require('mathjs');
 const fs = require("fs");
 
+var prefixes = ["mjs!", "!mjs", "Mjs!", "! Mjs", "!Mjs", "! mjs", "! Mjs", "MJS!", "!MJS", "mjs1", "1mjs", "Mjs1", "1 Mjs", "1Mjs", "1 mjs", "1 Mjs", "MJS1", "1MJS", "@mention ", "@mention"];
+//args.trim().slice(1);
+
 var bot = new Eris.CommandClient(fs.readFileSync('token.txt', 'utf8'), {}, {
     description: "An bot with the engine of math.js",
     owner: "A user",
-    prefix: ["mjs!", "!mjs", "Mjs!", "! Mjs", "!Mjs", "! mjs", "! Mjs", "MJS!", "!MJS", "mjs1", "1mjs", "Mjs1", "1 Mjs", "1Mjs", "1 mjs", "1 Mjs", "MJS1", "1MJS", "@mention ", "@mention"],
+    prefix: prefixes,
 	defaultHelpCommand: false
 });
 
@@ -66,11 +69,12 @@ bot.registerCommand("help", (msg) => {
 });
 bot.registerCommandAlias("commands", "help");
 bot.registerCommandAlias("command", "help");
-bot.registerCommandAlias("info", "help");
-bot.registerCommandAlias("information", "help");
 bot.registerCommandAlias("bothelp", "help");
 bot.registerCommandAlias("HELP", "help");
 bot.registerCommandAlias("Help", "help");
+bot.registerCommandAlias("h", "help");
+bot.registerCommandAlias("H", "help");
+bot.registerCommandAlias("", "help");
 
 bot.registerCommand("ping", (msg) => {
 	async function ping() {
@@ -91,7 +95,10 @@ var calcCommand = bot.registerCommand("calc", (msg, args) => { // Make an echo c
     if(args.length === 0) { // If the user just typed "!echo", say "Invalid input"
         return "Insert an text";
     }
-    var text = args.join(" "); // Make a string of the text after the command label
+    var text = args.join(" ").replace("`", "");
+    text = text.replace("`", "");
+    text = text.replace("²", "^2");
+    text = text.replace("π", "pi"); // Make a string of the text after the command label
 	try {
 		if (isNaN(text) || !isFinite(text)) {
 			try {
@@ -117,7 +124,7 @@ var calcCommand = bot.registerCommand("calc", (msg, args) => { // Make an echo c
 						],
 						footer: { // Footer text
 							text: "Try to use the aliases of this command!",
-							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256",
 						}
 					}
 				});
@@ -152,7 +159,6 @@ var calcCommand = bot.registerCommand("calc", (msg, args) => { // Make an echo c
 					}
 				}
 			});
-			bot.createMessage(msg.channel.id, "A text or bug has been detected, try to use math accounts");
 		}
 	} catch (e) {
 		bot.createMessage(msg.channel.id, {
@@ -182,6 +188,8 @@ bot.registerCommandAlias("math", "calc");
 bot.registerCommandAlias("maths", "calc");
 bot.registerCommandAlias("Calc", "calc");
 bot.registerCommandAlias("CALC", "calc");
+bot.registerCommandAlias("c", "calc");
+bot.registerCommandAlias("C", "calc");
 
 calcCommand.registerSubcommand("roll", (msg, args) => { // Make a reverse subcommand under echo
 	if(args.length === 0 || isNaN(args[0])) { // If the user just typed "!echo reverse", say "Invalid input"
@@ -193,7 +201,7 @@ calcCommand.registerSubcommand("roll", (msg, args) => { // Make a reverse subcom
 					embed: {
 						color: 0xde3812, // Color, either in hex (show), or a base-10 integer
 						author: { // Author property
-							name: "ðŸŽ² You rolled",
+							name: "🎲 You rolled",
 						},
 						description: "```" + number + "```",
 						footer: { // Footer text
@@ -247,5 +255,26 @@ calcCommand.registerSubcommand("flip", (msg) => {
 });
 calcCommand.registerSubcommandAlias("Flip", "flip"); // Alias "!echo backwards" to "!echo reverse"
 calcCommand.registerSubcommandAlias("FLIP", "flip"); // Alias "!echo backwards" to "!echo reverse"
+
+bot.registerCommand("info", (msg, args) => {
+	bot.createMessage(msg.channel.id, {
+		embed: {
+			description: "Hello, this bot calculates math expressions using `mjs!calc`.\nSee the list of commands using `mjs!help`",
+			author: { // Author property
+				name: "Info",
+				icon_url: bot.user.avatarURL
+			},
+			color: 0xde3812, // Color, either in hex (show), or a base-10 integer
+		}
+	});
+}, {
+    description: "Invite me!",
+    fullDescription: "Invite me to your server",
+	cooldown: 3000,
+	cooldownMessage: "```markdown\n# Calm down, or I'll end up having problems. #```"
+});
+bot.registerCommandAlias("Info", "info");
+bot.registerCommandAlias("INFO", "info");
+bot.registerCommandAlias("information", "info");
 
 bot.connect();
