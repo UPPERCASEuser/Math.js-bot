@@ -2,6 +2,21 @@ const Eris = require("eris");
 const math = require('mathjs');
 const fs = require("fs");
 
+const express = require('express');
+const keepalive = require('express-glitch-keepalive');
+
+const app = express();
+
+app.use(keepalive);
+
+app.get('/', (req, res) => {
+res.json('This bot should be online! Uptimerobot will keep it alive');
+});
+app.get("/", (request, response) => {
+response.sendStatus(200);
+});
+app.listen(process.env.PORT);
+
 var prefixes = ["mjs!", "!mjs", "Mjs!", "! Mjs", "!Mjs", "! mjs", "! Mjs", "MJS!", "!MJS", "mjs1", "1mjs", "Mjs1", "1 Mjs", "1Mjs", "1 mjs", "1 Mjs", "MJS1", "1MJS", "@mention ", "@mention"];
 //args.trim().slice(1);
 
@@ -27,42 +42,50 @@ bot.on("guildDelete", (guild) => {
 	bot.editStatus("online", { name: "mjs!help | " + bot.guilds.size +  " servers", type: 3});
 });
 
-bot.registerCommand("help", (msg) => {
-	bot.createMessage(msg.channel.id, {
-		embed: {
-			color: 0xde3812, // Color, either in hex (show), or a base-10 integer
-			author: { // Author property
-				name: "Commands",
-				icon_url: bot.user.avatarURL
-			},
-			fields: [ // Array of field objects
-				{
-					name: "help", // Field title
-					value: "This command", // Field
-					inline: false // Whether you want multiple fields in same line
-				},
-				{
-					name: "ping", // Field title
-					value: "Pong!", // Field
-					inline: false // Whether you want multiple fields in same line
-				},
-				{
-					name: "invite",
-					value: "Invite me!",
-					inline: false
-				},
-				{
-					name: "calc <calc>", // Field title
-					value: "The best command of the bot\n-- calc roll <num>: Roll a number\n-- calc flip: Flip a coin", // Field
-					inline: false // Whether you want multiple fields in same line
-				}
-			],
-            footer: { // Footer text
-                text: "Don't include <> in the commands",
-				icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
-            }
-		}
-	});
+bot.registerCommand("help", (msg, args) => {
+  function sendHelp(id){
+  	bot.createMessage(id, {
+		  embed: {
+			  color: 0xde3812, // Color, either in hex (show), or a base-10 integer
+			  author: { // Author property
+				  name: "Commands",
+				  icon_url: bot.user.avatarURL
+			  },
+			  fields: [ // Array of field objects
+				  {
+					  name: "help", // Field title
+					  value: "This command", // Field
+					  inline: false // Whether you want multiple fields in same line
+				  },
+          {
+            name: "info", // Field title
+            value: "An information of this bot", // Field
+            inline: false // Whether you want multiple fields in same line
+          },
+				  {
+					  name: "ping", // Field title
+					  value: "Pong!", // Field
+					  inline: false // Whether you want multiple fields in same line
+				  },
+				  {
+					  name: "invite",
+					  value: "Invite me!",
+					  inline: false
+				  },
+				  {
+					  name: "calc <calc>", // Field title
+					  value: "The best command of the bot\n-- calc roll <num>: Roll a number\n-- calc flip: Flip a coin", // Field
+					  inline: false // Whether you want multiple fields in same line
+				  }
+			  ],
+        footer: { // Footer text
+          text: "Don't include <> in the commands",
+				  icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+        }
+		  }
+	  });
+  };
+  if(args.join(" ") == "here"){ sendHelp(msg.channel.id); } else {bot.getDMChannel(msg.author.id).then(Privado => { sendHelp(Privado.id); if (msg.channel.guild) {bot.createMessage(msg.channel.id, "Check your DMs!");} })};
 }, {
 	cooldown: 3000,
 	cooldownMessage: "```markdown\n# Calm down, or I'll end up having problems. #```"
@@ -74,7 +97,7 @@ bot.registerCommandAlias("HELP", "help");
 bot.registerCommandAlias("Help", "help");
 bot.registerCommandAlias("h", "help");
 bot.registerCommandAlias("H", "help");
-bot.registerCommandAlias("", "help");
+bot.registerCommandAlias("", "help"); //yep this   w e i r e d   alias work
 
 bot.registerCommand("ping", (msg) => {
 	async function ping() {
@@ -99,83 +122,83 @@ var calcCommand = bot.registerCommand("calc", (msg, args) => { // Make an echo c
     text = text.replace("`", "");
     text = text.replace("²", "^2");
     text = text.replace("π", "pi"); // Make a string of the text after the command label
-	try {
-		if (isNaN(text) || !isFinite(text)) {
-			try {
-				result = math.eval(text);
-				bot.createMessage(msg.channel.id, {
-					embed: {
-						color: 0xde3812, // Color, either in hex (show), or a base-10 integer
-						author: { // Author property
-							name: "Result",
-							icon_url: bot.user.avatarURL
-						},
-						fields: [ // Array of field objects
-							{
-								name: "Mathematical account", // Field title
-								value: "```" + text + "```", // Field
-								inline: true // Whether you want multiple fields in same line
-							},
-							{
-								name: "Result", // Field title
-								value: "```js\n" + result + "```", // Field
-								inline: true // Whether you want multiple fields in same line
-							}
-						],
-						footer: { // Footer text
-							text: "Try to use the aliases of this command!",
-							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256",
-						}
-					}
-				});
-			} catch (e) {
-				bot.createMessage(msg.channel.id, {
-					embed: {
-						color: 0xff0000, // Color, either in hex (show), or a base-10 integer
-						author: { // Author property
-							name: "Error",
-							icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
-						},
-						description: "```" + e.toString() + "```",
-						footer: { // Footer text
-							text: "I've created a filter for you don't find errors HAHAHA",
-							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
-						}
-					}
-				});
-			}
-        } else {
-			bot.createMessage(msg.channel.id, {
-				embed: {
-					color: 0xff0000, // Color, either in hex (show), or a base-10 integer
-					author: { // Author property
-						name: "Error",
-						icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
-					},
-					description: "A text or bug has been detected, try to use math accounts",
-					footer: { // Footer text
-						text: "I've created a filter for you don't find errors HAHAHA",
-						icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
-					}
-				}
-			});
-		}
-	} catch (e) {
-		bot.createMessage(msg.channel.id, {
-			embed: {
-				color: 0xff0000, // Color, either in hex (show), or a base-10 integer
-				author: { // Author property
-					name: "Error",
-					icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
-				},
-				description: "```" + e.toString() + "```",
-				footer: { // Footer text
-					text: "I've created a filter for you don't find errors HAHAHA",
-					icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
-				}
-			}
-		});
-	}
+	  try {
+		  if (isNaN(text) || !isFinite(text)) {
+			  try {
+				  var result = math.eval(text);
+				  bot.createMessage(msg.channel.id, {
+				  	embed: {
+					  	color: 0xde3812, // Color, either in hex (show), or a base-10 integer
+						  author: { // Author property
+							  name: "Result",
+							  icon_url: bot.user.avatarURL
+						  },
+						  fields: [ // Array of field objects
+							  {
+								  name: "Mathematical account", // Field title
+								  value: "```" + text + "```", // Field
+								  inline: true // Whether you want multiple fields in same line
+						  	},
+							  {
+								  name: "Result", // Field title
+								  value: "```js\n" + result + "```", // Field
+								  inline: true // Whether you want multiple fields in same line
+						  	}
+						  ],
+						  footer: { // Footer text
+							  text: "Try to use the aliases of this command!",
+							  icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256",
+						  }
+					  }
+				  });
+			  } catch (e) {
+				  bot.createMessage(msg.channel.id, {
+					  embed: {
+						  color: 0xff0000, // Color, either in hex (show), or a base-10 integer
+						  author: { // Author property
+							  name: "Error",
+							  icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
+						  },
+						  description: "```" + e.toString() + "```",
+						  footer: { // Footer text
+							  text: "Verify your math operation. Remenber: try to use the dot, not the comma",
+							  icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+						  }
+					  }
+				  });
+			  }
+      } else {
+			  bot.createMessage(msg.channel.id, {
+				  embed: {
+					  color: 0xff0000, // Color, either in hex (show), or a base-10 integer
+					  author: { // Author property
+						  name: "Error",
+						  icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
+					  },
+					  description: "A text or bug has been detected, try to use math accounts",
+					  footer: { // Footer text
+						  text: "Verify your math operation. Remenber: try to use the dot, not the comma",
+						  icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+					  }
+				  }
+			  });
+		  }
+	  } catch (e) {
+		  bot.createMessage(msg.channel.id, {
+			  embed: {
+				  color: 0xff0000, // Color, either in hex (show), or a base-10 integer
+				  author: { // Author property
+					  name: "Error",
+					  icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
+				  },
+				  description: "```" + e.toString() + "```",
+				  footer: { // Footer text
+					  text: "Verify your math operation. Remenber: try to use the dot, not the comma",
+					  icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+				  }
+			  }
+		  });
+	  }
 }, {
     description: "Calculate",
     fullDescription: "Calculate anything using the math.js engine",
