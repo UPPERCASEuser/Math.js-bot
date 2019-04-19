@@ -1,7 +1,10 @@
 const Eris = require("eris");
 const math = require('mathjs');
 const fs = require("fs");
+var BS= require("botlist.space");
+const DBL = require("dblapi.js");
 
+//website
 const express = require('express');
 const keepalive = require('express-glitch-keepalive');
 
@@ -9,37 +12,50 @@ const app = express();
 
 app.use(keepalive);
 
+app.use(express.static('public'));
+
 app.get('/', (req, res) => {
-res.json('This bot should be online! Uptimerobot will keep it alive');
+ res.sendFile(__dirname + '/views/appindex.html');
 });
 app.get("/", (request, response) => {
-response.sendStatus(200);
+ response.sendStatus(200);
 });
 app.listen(process.env.PORT);
 
+
+//code
 var prefixes = ["mjs!", "!mjs", "Mjs!", "! Mjs", "!Mjs", "! mjs", "! Mjs", "MJS!", "!MJS", "mjs1", "1mjs", "Mjs1", "1 Mjs", "1Mjs", "1 mjs", "1 Mjs", "MJS1", "1MJS", "@mention ", "@mention"];
 //args.trim().slice(1);
 
-var bot = new Eris.CommandClient(fs.readFileSync('token.txt', 'utf8'), {}, {
+var bot = new Eris.CommandClient(process.env.BOT_TOKEN, {}, {
     description: "An bot with the engine of math.js",
     owner: "A user",
     prefix: prefixes,
 	defaultHelpCommand: false
 });
 
+const bsClient = new BS({ botToken: process.env.BS_TOKEN, id: '538357066805411841' })
+const dbl = new DBL(process.env.DBL_TOKEN, bot);
+
 bot.on("ready", () => { // When the bot is ready
     console.log("Servers: " + bot.guilds.size + "." + " Logged in: " + bot.user.id);
     bot.editStatus("online", { name: "mjs!help | " + bot.guilds.size +  " servers", type: 3});
+  bsClient.postServerCount(bot.guilds.size);
+  dbl.postStats(bot.guilds.size);
 });
 
 bot.on("guildCreate", (guild) => {
 	console.log("Server joined! Server counter: " + bot.guilds.size);
 	bot.editStatus("online", { name: "mjs!help | " + bot.guilds.size +  " servers", type: 3});
+  bsClient.postServerCount(bot.guilds.size);
+  dbl.postStats(bot.guilds.size);
 });
 
 bot.on("guildDelete", (guild) => {
 	console.log("Server Removed ;-;. Server counter: " + bot.guilds.size);
 	bot.editStatus("online", { name: "mjs!help | " + bot.guilds.size +  " servers", type: 3});
+  bsClient.postServerCount(bot.guilds.size);
+  dbl.postStats(bot.guilds.size);
 });
 
 bot.registerCommand("help", (msg, args) => {
@@ -74,12 +90,12 @@ bot.registerCommand("help", (msg, args) => {
 				  },
 				  {
 					  name: "calc <calc>", // Field title
-					  value: "The best command of the bot\n-- calc roll <num>: Roll a number\n-- calc flip: Flip a coin", // Field
+					  value: "The best command of the bot\n-- calc roll <num>: Roll a number\n-- calc flip: Flip a coin\n-- calc roman: Convert an number to roman\n-- calc dec: Convert an roman number to decimal", // Field
 					  inline: false // Whether you want multiple fields in same line
 				  }
 			  ],
         footer: { // Footer text
-          text: "Don't include <> in the commands",
+          text: "Don't include <> on commands",
 				  icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
         }
 		  }
@@ -245,7 +261,7 @@ calcCommand.registerSubcommandAlias("ROLL", "roll"); // Alias "!echo backwards" 
 bot.registerCommand("invite", (msg) => {
 	bot.createMessage(msg.channel.id, {
 		embed: {
-		description: "**[Invite](https://discordapp.com/oauth2/authorize?client_id=538357066805411841&permissions=391232&redirect_uri=http%3A%2F%2Fmathjs.org%2Findex.html&scope=bot)**\n\n[Official server](https://discord.gg/67NkaBY)\n[Github](https://github.com/UPPERCASEuser/Math.js-bot)\n[List to-do](https://trello.com/invite/b/ZndibEkk/e0cfe1d171c054a98f5a609e505833b4/mathjs-bot)",
+		description: "**[Invite](https://discordapp.com/oauth2/authorize?client_id=538357066805411841&permissions=391232&redirect_uri=http%3A%2F%2Fmathjs.org%2Findex.html&scope=bot)**\n\n[Official server](https://discord.gg/67NkaBY)\n[Github](https://github.com/UPPERCASEuser/Math.js-bot)\n[List to-do](https://trello.com/invite/b/ZndibEkk/e0cfe1d171c054a98f5a609e505833b4/mathjs-bot)\n[Upvote it!](https://discordbots.org/bot/538357066805411841/vote)",
 			author: { // Author property
 				name: "Invite",
 				icon_url: bot.user.avatarURL
@@ -278,6 +294,91 @@ calcCommand.registerSubcommand("flip", (msg) => {
 });
 calcCommand.registerSubcommandAlias("Flip", "flip"); // Alias "!echo backwards" to "!echo reverse"
 calcCommand.registerSubcommandAlias("FLIP", "flip"); // Alias "!echo backwards" to "!echo reverse"
+
+calcCommand.registerSubcommand("roman", (msg, args) => {
+  var num = args.join(" ");
+    if (isNaN(num))
+        return NaN;
+    var digits = String(+num).split(""),
+        key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
+               "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
+               "","I","II","III","IV","V","VI","VII","VIII","IX"],
+        roman = "",
+        i = 3;
+    while (i--)
+        roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+    var output = Array(+digits.join("") + 1).join("M") + roman;
+  				bot.createMessage(msg.channel.id, {
+					embed: {
+						color: 0xde3812, // Color, either in hex (show), or a base-10 integer
+						author: { // Author property
+							name: "Output",
+						},
+						description: "```" + output + "```",
+						footer: { // Footer text
+							text: "Use mjs!calc dec",
+							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+						}
+					}
+				});
+}, {
+	cooldown: 3000,
+	cooldownMessage: "```markdown\n# Calm down, or I'll end up having problems. #```"
+});
+calcCommand.registerSubcommandAlias("Roman", "roman"); // Alias "!echo backwards" to "!echo reverse"
+calcCommand.registerSubcommandAlias("ROMAN", "roman"); // Alias "!echo backwards" to "!echo reverse"
+
+calcCommand.registerSubcommand("decimal", (msg, args) => {
+  function roman_to_Int(str1) {
+ if(str1 == null) return -1;
+ var num = char_to_int(str1.charAt(0));
+ var pre, curr;
+
+ for(var i = 1; i < str1.length; i++){
+  curr = char_to_int(str1.charAt(i));
+  pre = char_to_int(str1.charAt(i-1));
+  if(curr <= pre){
+   num += curr;
+  } else {
+   num = num - pre*2 + curr;
+  }
+ }
+
+ return num;
+}
+
+function char_to_int(c){
+ switch (c){
+  case 'I': return 1;
+  case 'V': return 5;
+  case 'X': return 10;
+  case 'L': return 50;
+  case 'C': return 100;
+  case 'D': return 500;
+  case 'M': return 1000;
+  default: return -1;
+ }
+}
+  			bot.createMessage(msg.channel.id, {
+					embed: {
+						color: 0xde3812, // Color, either in hex (show), or a base-10 integer
+						author: { // Author property
+							name: "Output",
+						},
+						description: "```" + roman_to_Int(args.join("")) + "```",
+						footer: { // Footer text
+							text: "Use mjs!calc roman",
+							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+						}
+					}
+				});
+}, {
+	cooldown: 3000,
+	cooldownMessage: "```markdown\n# Calm down, or I'll end up having problems. #```"
+});
+calcCommand.registerSubcommandAlias("Decimal", "decimal"); // Alias "!echo backwards" to "!echo reverse"
+calcCommand.registerSubcommandAlias("DECIMAL", "decimal"); // Alias "!echo backwards" to "!echo reverse"
+calcCommand.registerSubcommandAlias("dec", "decimal"); // Alias "!echo backwards" to "!echo reverse"
 
 bot.registerCommand("info", (msg, args) => {
 	bot.createMessage(msg.channel.id, {
