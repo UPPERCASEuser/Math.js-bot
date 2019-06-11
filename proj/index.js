@@ -1,11 +1,19 @@
+/*
+Welcome to the code of Math.js bot
+Invite: https://discordapp.com/oauth2/authorize?client_id=538357066805411841&permissions=391232&redirect_uri=http%3A%2F%2Fmathjs.org%2Findex.html&scope=bot
+*/
+
+
+     
+//modules
 const Eris = require("eris");
 const math = require('mathjs');
 const fs = require("fs");
-var BS= require("botlist.space");
+const BS= require("botlist.space");
 const DBL = require("dblapi.js");
+const express = require('express');
 
 //website
-const express = require('express');
 const keepalive = require('express-glitch-keepalive');
 
 const app = express();
@@ -24,7 +32,7 @@ app.listen(process.env.PORT);
 
 
 //code
-var prefixes = ["mjs!", "!mjs", "Mjs!", "! Mjs", "!Mjs", "! mjs", "! Mjs", "MJS!", "!MJS", "mjs1", "1mjs", "Mjs1", "1 Mjs", "1Mjs", "1 mjs", "1 Mjs", "MJS1", "1MJS", "@mention ", "@mention"];
+var prefixes = ["mjs!", "!mjs", "Mjs!", "! Mjs", "!Mjs", "! mjs", "! Mjs", "MJS!", "!MJS", "mjs1", "1mjs", "Mjs1", "1 Mjs", "1Mjs", "1 mjs", "1 Mjs", "MJS1", "1MJS", "mathjs ", "mathjsbot ", "math.js ", "mjs ", "@mention ", "@mention"];
 //args.trim().slice(1);
 
 var bot = new Eris.CommandClient(process.env.BOT_TOKEN, {}, {
@@ -113,14 +121,19 @@ bot.registerCommandAlias("HELP", "help");
 bot.registerCommandAlias("Help", "help");
 bot.registerCommandAlias("h", "help");
 bot.registerCommandAlias("H", "help");
-bot.registerCommandAlias("", "help"); //yep this   w e i r e d   alias work
 
 bot.registerCommand("ping", (msg) => {
-	async function ping() {
-		const m = await bot.createMessage(msg.channel.id, ":arrows_counterclockwise:");
-		m.edit(":ping_pong: Pong! " + (m.timestamp - msg.timestamp) + "ms");
-	}
-	ping();
+		bot.createMessage(msg.channel.id, ":arrows_counterclockwise:").then(m => {
+     m.edit({
+      content: " ",
+		  embed: {
+       author: { // Author property
+		    name: "Pong! " + (m.timestamp - msg.timestamp) + "ms",
+		    icon_url: bot.user.avatarURL
+		   },
+		   color: 0xde3812, // Color, either in hex (show), or a base-10 integer
+		  }});
+    });
 }, {
     description: "Pong!",
     fullDescription: "This command could be used to check if the bot is up. Or entertainment when you're bored.",
@@ -132,7 +145,21 @@ bot.registerCommandAlias("Ping", "ping");
 
 var calcCommand = bot.registerCommand("calc", (msg, args) => { // Make an echo command
     if(args.length === 0) { // If the user just typed "!echo", say "Invalid input"
-        return "Insert an text";
+        bot.createMessage(msg.channel.id, {
+					  embed: {
+						  color: 0xff0000, // Color, either in hex (show), or a base-10 integer
+						  author: { // Author property
+							  name: "Error",
+							  icon_url: "https://cdn.discordapp.com/attachments/507651369147170842/551108357134483482/error.png"
+						  },
+						  description: "Insert a text",
+						  footer: { // Footer text
+							  text: "lul",
+							  icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
+						  }
+					  }
+				  });
+        return;
     }
     var text = args.join(" ").replace("`", "");
     text = text.replace("`", "");
@@ -261,12 +288,12 @@ calcCommand.registerSubcommandAlias("ROLL", "roll"); // Alias "!echo backwards" 
 bot.registerCommand("invite", (msg) => {
 	bot.createMessage(msg.channel.id, {
 		embed: {
-		description: "**[Invite](https://discordapp.com/oauth2/authorize?client_id=538357066805411841&permissions=391232&redirect_uri=http%3A%2F%2Fmathjs.org%2Findex.html&scope=bot)**\n\n[Official server](https://discord.gg/67NkaBY)\n[Github](https://github.com/UPPERCASEuser/Math.js-bot)\n[List to-do](https://trello.com/invite/b/ZndibEkk/e0cfe1d171c054a98f5a609e505833b4/mathjs-bot)\n[Upvote it!](https://discordbots.org/bot/538357066805411841/vote)",
-			author: { // Author property
-				name: "Invite",
-				icon_url: bot.user.avatarURL
-			},
-			color: 0xde3812, // Color, either in hex (show), or a base-10 integer
+		 description: "**[Invite](https://discordapp.com/oauth2/authorize?client_id=538357066805411841&permissions=391232&redirect_uri=http%3A%2F%2Fmathjs.org%2Findex.html&scope=bot)**\n\n[Official server](https://discord.gg/67NkaBY)\n[Github](https://github.com/UPPERCASEuser/Math.js-bot)\n[List to-do](https://trello.com/invite/b/ZndibEkk/e0cfe1d171c054a98f5a609e505833b4/mathjs-bot)\n[Upvote it!](https://discordbots.org/bot/538357066805411841/vote)",
+		 author: { // Author property
+		  name: "Invite",
+		  icon_url: bot.user.avatarURL
+		 },
+		 color: 0xde3812, // Color, either in hex (show), or a base-10 integer
 		}
 	});
 }, {
@@ -365,7 +392,7 @@ function char_to_int(c){
 						author: { // Author property
 							name: "Output",
 						},
-						description: "```" + roman_to_Int(args.join("")) + "```",
+						description: "```" + roman_to_Int(args[0].toUpperCase()) + "```",
 						footer: { // Footer text
 							text: "Use mjs!calc roman",
 							icon_url: "https://cdn.discordapp.com/avatars/264062457448759296/9375d757c7fe39d8d344b523ef9a08b8.png?size=256"
@@ -380,12 +407,12 @@ calcCommand.registerSubcommandAlias("Decimal", "decimal"); // Alias "!echo backw
 calcCommand.registerSubcommandAlias("DECIMAL", "decimal"); // Alias "!echo backwards" to "!echo reverse"
 calcCommand.registerSubcommandAlias("dec", "decimal"); // Alias "!echo backwards" to "!echo reverse"
 
-bot.registerCommand("info", (msg, args) => {
+var infoCommand = bot.registerCommand("info", (msg, args) => {
 	bot.createMessage(msg.channel.id, {
 		embed: {
-			description: "Hello, this bot calculates math expressions using `mjs!calc`.\nSee the list of commands using `mjs!help`",
+			description: "This bot calculates math expressions using `mjs!calc`.\nSee the list of commands using `mjs!help`",
 			author: { // Author property
-				name: "Info",
+				name: "Hey!",
 				icon_url: bot.user.avatarURL
 			},
 			color: 0xde3812, // Color, either in hex (show), or a base-10 integer
@@ -400,5 +427,16 @@ bot.registerCommand("info", (msg, args) => {
 bot.registerCommandAlias("Info", "info");
 bot.registerCommandAlias("INFO", "info");
 bot.registerCommandAlias("information", "info");
+bot.registerCommandAlias("", "info"); //yep this   w e i r e d   alias works
+bot.registerCommandAlias("about", "info");
+
+infoCommand.registerSubcommand("specifications", (msg, args) => {
+  
+}, {
+  cooldown: 3000,
+	cooldownMessage: "```markdown\n# Calm down, or I'll end up having problems. #```"
+});
+
+infoCommand.registerSubcommandAlias("sys", "specifications");
 
 bot.connect();
